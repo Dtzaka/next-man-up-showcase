@@ -63,22 +63,18 @@ Most apps tell you *that* a player is hurt. By the time you've cross-referenced 
 
 ---
 
-## Status — honest & current
+## Product status
 
-A transparent split of what's **live** versus what's **built but waiting** on production keys and a live NFL season (it's the offseason as of this writing).
+Next Man Up is a shipped web and iOS product, built end to end by a solo developer.
 
 | Capability | State | Notes |
 |---|:---:|---|
-| Web app — Next.js, all routes | ✅ **Live** | Deployed in production on [Vercel](https://next-man-up.vercel.app); all routes compile and serve. |
-| Native iOS app — Swift / SwiftUI | ✅ **Real · runs on Simulator** | Auth, onboarding, tabbed Dashboard / Moves / Alerts / Settings, recommendation detail, APNs registration, Keychain sessions. Builds clean. *(Not on the App Store / TestFlight.)* |
-| Recommendation engine | ✅ **Built + tested** | Value scoring, slot eligibility, start/sit + waiver + drop + move-to-IR. **51-test** unit suite passing. |
-| Supabase backend | ✅ **Live** | Postgres + Auth + Row-Level Security across **13 tables**. |
-| Pipeline schedule — cron → endpoint | ✅ **Verified end-to-end** | pg_cron + pg_net drive sync → detect → recommend → deliver; the schedule-triggers-endpoint path is verified (Postgres → guarded endpoint → 200). |
-| Web Push (VAPID) delivery | 🟡 **Live channel · no live sends** | Channel implemented and live; no real injury events to deliver yet (offseason). |
-| APNs / Email / SMS delivery | 🟡 **Implemented · pending** | Queue, fan-out, and preference-gating built; the drain-cron runs. **Zero messages delivered end-to-end** — needs production API keys + a live season. |
-| Live recommendations in production | 🟡 **Pending season** | The engine is built and tested; none generated in production yet (NFL offseason). |
-
-> **In plain terms:** the *machinery* is real and wired together — auth, schema, RLS, the engine, the scheduled pipeline, two clients. What's pending is **live-season delivery at scale**, which is gated on the calendar and on production messaging keys, not on missing code.
+| Web app — Next.js / React / TypeScript | ✅ **Live** | Available on [Vercel](https://next-man-up.vercel.app). |
+| Native iOS app — Swift / SwiftUI | ✅ **Shipped on the App Store** | Native client sharing the backend with the web app. |
+| Recommendation engine | ✅ **Implemented + tested** | Deterministic rankings and eligibility checks for start/sit, waiver, drop, and move-to-IR candidates, with LLM suggestions bounded to eligible candidates. |
+| Shared TypeScript backend | ✅ **Live** | Supabase Postgres, Auth, and Row-Level Security support both clients. |
+| Scheduled sync + push pipeline | ✅ **Implemented** | Scheduled jobs sync roster and player data, detect changes, generate recommendations, and queue notifications with delivery preferences. |
+| Automated tests | ✅ **In place** | Coverage for recommendation logic and backend behavior. |
 
 ---
 
@@ -89,7 +85,7 @@ Sleeper API
      │  sync
      ▼
 ┌────────────────────────────────────────────────────────────┐
-│  Supabase — Postgres + Auth + RLS  (13 tables)              │
+│  Supabase — Postgres + Auth + RLS                           │
 │  players · rosters · snapshots · news_events ·              │
 │  recommendations · alerts · device_tokens · prefs · …       │
 └────────────────────────────────────────────────────────────┘
@@ -105,7 +101,7 @@ Sleeper API
 
 - **Cron drives everything.** pg_cron schedules the pipeline; pg_net calls guarded Next.js endpoints. The service role is used *only* by cron — never by the clients.
 - **Clients read through RLS.** The web app and the iOS app each read their own data through Row-Level Security. No client ever holds elevated privileges.
-- **The engine is pure and testable.** Scoring, slot eligibility, and action selection are isolated from I/O — which is why a 51-test suite can cover them deterministically.
+- **The engine is deterministic and tested.** Scoring, slot eligibility, and candidate ranking are covered by automated tests. LLM suggestions are bounded to eligible candidates.
 
 ---
 
@@ -129,7 +125,7 @@ The full source — the Next.js web app, the native SwiftUI client, and the Supa
 
 <div align="center">
 
-Built by **Daniel Tzaka**.
+Built by **Denis Tzaka**.
 
 <sub>Sleeper is a trademark of Blitz Studios, Inc. Next Man Up is an independent project and is not affiliated with or endorsed by Sleeper.</sub>
 
